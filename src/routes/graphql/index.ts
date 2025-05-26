@@ -6,7 +6,8 @@ import {
 } from './schemas.js';
 import { graphql, parse, validate, specifiedRules, GraphQLError } from 'graphql';
 import depthLimit from 'graphql-depth-limit';
-import { createContext } from './context.js';
+import { createContext } from './types/utils.js';
+
 
 const GRAPHQL_RULES = [...specifiedRules, depthLimit(5)];
 
@@ -40,7 +41,7 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         }
 
 
-        const context = await createContext(request, fastify);
+        const context = createContext(request, fastify);
 
       
         const executionResult = await graphql({

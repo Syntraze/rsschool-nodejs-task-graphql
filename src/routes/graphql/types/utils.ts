@@ -1,3 +1,6 @@
+import { FastifyRequest } from 'fastify';
+import { createDataLoaders } from '../DataLoaders.js';
+
 export function mapById(items, key = 'id') {
   const map = new Map();
   for (const item of items) {
@@ -20,3 +23,13 @@ export const handleError = (error, message) => {
   console.error(message, error);
   throw new Error(message);
 };
+
+export function createContext(req: FastifyRequest, fastify) {
+  const prisma = fastify.prisma;
+  const loaders = createDataLoaders(prisma);
+  return {
+    prisma,
+    loaders,
+    fastify,
+  };
+}
