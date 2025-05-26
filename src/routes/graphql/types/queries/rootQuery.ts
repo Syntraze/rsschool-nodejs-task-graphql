@@ -7,7 +7,6 @@ import { UUIDType } from '../uuid.js';
 import { MemberTypeIdEnum } from './memberType.js';
 import type { PrismaClient } from '@prisma/client';
 
-// Typings for context & args
 interface Context {
   prisma: PrismaClient;
 }
@@ -56,7 +55,6 @@ export const RootQueryType = new GraphQLObjectType({
     users: {
       type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(UserType))),
       resolve: async (_parent, _args: UsersArgs, context: Context) => {
-        // Optionally, you can still dynamically include relations based on your needs
         return context.prisma.user.findMany({
           include: {
             profile: true,

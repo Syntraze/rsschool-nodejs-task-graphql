@@ -24,7 +24,7 @@ export const ProfileType = new GraphQLObjectType({
       resolve: async (
         parent: { memberTypeId?: string },
         _args: unknown,
-        context: { prisma: any }, // better to define Prisma type if available
+        context: { prisma: any },
       ) => {
         if (!parent.memberTypeId) return null;
         return context.prisma.memberType.findUnique({
