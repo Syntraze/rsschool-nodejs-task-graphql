@@ -1,6 +1,6 @@
 import { Type } from '@fastify/type-provider-typebox';
 import { GraphQLSchema } from 'graphql';
-import { RootQueryType } from './types/queries/rootQuery.js';
+import { QueryType } from './types/queries/QueryType.js';
 import { MutationType } from './types/mutation.js';
 
 
@@ -24,6 +24,6 @@ export const createGqlResponseSchema = {
 };
 
 export const schema = new GraphQLSchema({
-  query: RootQueryType,
+  query: QueryType,
   mutation: MutationType,
 });

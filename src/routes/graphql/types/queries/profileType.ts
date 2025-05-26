@@ -24,12 +24,11 @@ export const ProfileType = new GraphQLObjectType({
       resolve: async (
         parent: { memberTypeId?: string },
         _args: unknown,
-        context: { prisma: any },
+        context: { loaders: { memberTypeLoader: { load: (id: string) => Promise<unknown> } } }
       ) => {
+        const { memberTypeLoader } = context.loaders;
         if (!parent.memberTypeId) return null;
-        return context.prisma.memberType.findUnique({
-          where: { id: parent.memberTypeId },
-        });
+        return memberTypeLoader.load(parent.memberTypeId);
       },
     },
   }),

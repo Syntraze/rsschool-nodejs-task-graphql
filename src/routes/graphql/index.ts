@@ -1,12 +1,16 @@
 import { FastifyPluginAsyncTypebox } from '@fastify/type-provider-typebox';
-import { createGqlResponseSchema, gqlResponseSchema, schema } from './schemas.js';
+import {
+  createGqlResponseSchema,
+  gqlResponseSchema,
+  schema as gqlSchema,
+} from './schemas.js';
 import { graphql, parse, validate, specifiedRules, GraphQLError } from 'graphql';
 import depthLimit from 'graphql-depth-limit';
 import { createContext } from './context.js';
 
-const VALIDATION_RULES = [...specifiedRules, depthLimit(5)];
+const GRAPHQL_RULES = [...specifiedRules, depthLimit(5)];
 
-const formatErrors = (errors: readonly GraphQLError[]) => ({
+const formatGraphQLErrors = (errors: readonly GraphQLError[]) => ({
   errors: errors.map((error) =>
     error instanceof GraphQLError ? error : new GraphQLError(String(error)),
   ),
@@ -22,34 +26,38 @@ const plugin: FastifyPluginAsyncTypebox = async (fastify) => {
         200: gqlResponseSchema,
       },
     },
-    async handler(req) {
+    async handler(request) {
       try {
-        const { query, variables } = req.body;
+        const { query, variables } = request.body;
 
-        // Early parse and validation
-        const document = parse(query);
-        const validationErrors = validate(schema, document, VALIDATION_RULES);
+    
+        const parsedQuery = parse(query);
+
+  
+        const validationErrors = validate(gqlSchema, parsedQuery, GRAPHQL_RULES);
         if (validationErrors.length > 0) {
-          return formatErrors(validationErrors);
+          return formatGraphQLErrors(validationErrors);
         }
 
-        const context = await createContext(req, fastify);
 
-        const result = await graphql({
-          schema,
+        const context = await createContext(request, fastify);
+
+      
+        const executionResult = await graphql({
+          schema: gqlSchema,
           source: query,
           variableValues: variables,
           contextValue: context,
         });
 
-        return result;
+        return executionResult;
       } catch (error: unknown) {
         console.error('GraphQL Execution Error:', error);
-        const graphQLErr =
+        const graphQLError =
           error instanceof GraphQLError
             ? error
-            : new GraphQLError((error as Error).message || 'Internal error');
-        return formatErrors([graphQLErr]);
+            : new GraphQLError((error as Error).message || 'Internal server error');
+        return formatGraphQLErrors([graphQLError]);
       }
     },
   });
